@@ -1,0 +1,7 @@
+services:
+  node-app:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "${HOST_PORT}:${CONTAINER_PORT}"
