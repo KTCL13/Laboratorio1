@@ -8,6 +8,7 @@ app.use(express.json());
 
 const instances = []
 
+
 app.post("/discoveryServer", async(req, res) => {
     console.log("data:",req.body);
     const instance= req.body
