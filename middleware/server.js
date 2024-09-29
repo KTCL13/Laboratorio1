@@ -8,6 +8,7 @@ app.use(express.json());
 
 let instances = [];
 let connections = [];
+const logs = [];
 
 app.post("/middleware", (req, res) => {
   instances = req.body;
@@ -32,11 +33,13 @@ app.post("/request", async (req, res) => {
       const response = await axios.post(currentServer.instance.url, req.body);
       currentServer.requests++;
       success = true;
+      logs.push(`${currentServer.instance.url} : ${response.requests.status}`);
       return res.json(response.data);
     } catch (error) {
       console.log(`Error con servidor: ${currentServer.instance.url}`);
       errorMessages.push(`Error con servidor ${currentServer.instance.url}: ${error.message}`);
       serverTried++;
+      logs.push(`${currentServer.instance.url}: ${error.message}`);
     }
   }
 
@@ -47,6 +50,13 @@ app.post("/request", async (req, res) => {
       serversTried: serverTried
     });
   }
+});
+
+
+app.get("/status", (req,res) =>{
+  
+  res.json(logs);
+
 });
 
 setInterval(() => {
