@@ -1,0 +1,6 @@
+discoveryserver/node_modules/
+middleware/node_modules/
+servicesServer/node_modules
+
+*.log
+*.env

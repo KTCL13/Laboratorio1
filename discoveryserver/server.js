@@ -6,23 +6,22 @@ const port = 3000;
 
 app.use(express.json());
 
-const instances = []
+let instances = [];
 
-app.post("/discoveryServer", async(req, res) => {
-    console.log("data:",req.body);
-    const instance= req.body
+app.post("/discoveryServer", async (req, res) => {
+    console.log("Datos recibidos:", req.body);
+    const instance = req.body;
     instances.push(instance);
     res.status(200).end();
-    const requestOptions ={
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(instances)
-    }; 
-    await fetch(`http:192.168.32.1:5000/middleware`, requestOptions).then((response) => {
-      console.log(response.status);
-    });
-  });
+
+    try {
+        await axios.post("localhost:5000/middleware", instances);
+        console.log("Instancias enviadas al middleware");
+    } catch (error) {
+        console.error("Error al enviar instancias al middleware:", error);
+    }
+});
 
 app.listen(port, () => {
-    console.log(`Servidor corriendo en la puerto: ${port}`);
+    console.log(`Discovery Server corriendo en el puerto: ${port}`);
 });
