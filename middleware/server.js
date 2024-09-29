@@ -25,18 +25,33 @@ app.post("/request", async (req, res) => {
   let errorMessages = [];
   let serverTried = 0;
 
-  for (let i = 0; i < connections.length; i++) {
-    let currentServer = connections[i];
+  let leastConnectedServer = connections.reduce((prev, curr) => 
+    prev.requests < curr.requests ? prev : curr
+  );
 
+  for (let i = 0; i < connections.length; i++) {
     try {
-      const response = await axios.post(currentServer.instance.url, req.body);
-      currentServer.requests++;
-      success = true;
+      console.log(`Llamando a servidor: ${leastConnectedServer.instance.url}`);
+
+      const response = await axios.post(leastConnectedServer.instance.url, req.body);
+      leastConnectedServer.requests++;
+      success = true; 
       return res.json(response.data);
+
     } catch (error) {
-      console.log(`Error con servidor: ${currentServer.instance.url}`);
-      errorMessages.push(`Error con servidor ${currentServer.instance.url}: ${error.message}`);
+      console.log(`Error. ${leastConnectedServer.instance.url}: ${error.message}. ${new Date()}`);
+      errorMessages.push(`Error. ${leastConnectedServer.instance.url}: ${error.message}. ${new Date()}`);
       serverTried++;
+
+      connections = connections.filter(conn => conn.instance.url !== leastConnectedServer.instance.url);
+
+      if (connections.length > 0) {
+        leastConnectedServer = connections.reduce((prev, curr) => 
+          prev.requests < curr.requests ? prev : curr
+        );
+      } else {
+        break; 
+      }
     }
   }
 
@@ -48,6 +63,7 @@ app.post("/request", async (req, res) => {
     });
   }
 });
+
 
 setInterval(() => {
   connections.forEach(server => server.requests = 0);
