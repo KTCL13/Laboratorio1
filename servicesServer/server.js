@@ -18,7 +18,7 @@ app.post("/tokens", (req, res) => {
     return res.status(400).json({ error: "No text provided" });
   }
 
-  
+  // Ejecutar el script de Python para contar los tokens
   const pythonProcess = exec(`python count_tokens.py`, (error, stdout, stderr) => {
     if (error) {
       console.error("Error ejecutando el script de Python:", error);
@@ -43,7 +43,7 @@ app.post("/tokens", (req, res) => {
   pythonProcess.stdin.end();
 });
 
-
+// Servidor en el puerto especificado
 app.listen(containerPort, () => {
   console.log(`Server is running on port ${containerPort}`);
 });
