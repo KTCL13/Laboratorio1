@@ -30,10 +30,6 @@ app.post("/request", async (req, res) => {
   );
 
   for (let i = 0; i < connections.length; i++) {
-
-
-
-  for (let i = 0; i < connections.length; i++) {
     try {
 
       console.log(`Llamando a servidor: ${leastConnectedServer.instance}/tokens`);
