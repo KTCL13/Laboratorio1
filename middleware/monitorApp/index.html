@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app" class="table-container">
+        <h1>Monitor</h1>
+
+        <div class="tables-wrapper">
+            <div v-for="server in servers" :key="server.instance" class="server-table">
+                <h2>{{ server.instance }}</h2>
+                <p>Requests por minuto: {{ server.requests }}</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Logs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(log, index) in server.logs" :key="index">
+                            <td>{{ log }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="button-container">
+            <button @click="loadLogs()">Actualizar</button>
+        </div>
+    </div>
+    <script src="monitor.js"></script>
+</body>
+</html>
