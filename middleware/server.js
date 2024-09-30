@@ -31,13 +31,20 @@ app.post("/request", async (req, res) => {
 
   for (let i = 0; i < connections.length; i++) {
 
+
+
+  for (let i = 0; i < connections.length; i++) {
     try {
+
       console.log(`Llamando a servidor: ${leastConnectedServer.instance}/tokens`);
       const response = await axios.post(`http://${leastConnectedServer.instance}/tokens`, req.body);
       leastConnectedServer.requests++;
       leastConnectedServer.logs.push(`${new Date()} - ${req.url} -  ${req.method}. ${response.body}`)
+
       return res.json(response.data);
+
     } catch (error) {
+
       console.log(`Error. ${leastConnectedServer.instance}: ${error.message}. ${new Date()}`);
       leastConnectedServer.requests++;
       if (error.response) {
@@ -57,6 +64,7 @@ app.post("/request", async (req, res) => {
       } else {
         connections.forEach(conn => conn.tried = false);
         return res.status(503).json({ error: "No hay servidores disponibles" });
+
       }
     }
   }
@@ -69,6 +77,7 @@ app.post("/request", async (req, res) => {
 app.get("/status", (req,res) =>{
   res.json(connections);
 });
+
 
 setInterval(() => {
   connections.forEach(server => server.requests = 0);
