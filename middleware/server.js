@@ -1,17 +1,20 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
 
 const app = express();
 const port = 5000;
 
 app.use(express.json());
+app.use(cors());
 
-let instances = [];
 let connections = [];
+const logs = [];
+
 
 app.post("/middleware", (req, res) => {
-  instances = req.body;
-  connections = instances.map(instance => ({ instance, requests: 0 }));
+  let instance = req.body
+  connections.push({instance:`${instance.ipAddress}:${instance.port}`, requests: 0 , logs: [], tried:false });
   res.status(200).end();
   console.log("Instancias actualizadas: ", connections);
 });
@@ -21,47 +24,58 @@ app.post("/request", async (req, res) => {
     return res.status(503).json({ error: "No hay servidores disponibles" });
   }
 
-  let success = false;
-  let errorMessages = [];
-  let serverTried = 0;
 
   let leastConnectedServer = connections.reduce((prev, curr) => 
     prev.requests < curr.requests ? prev : curr
   );
 
   for (let i = 0; i < connections.length; i++) {
-    try {
-      console.log(`Llamando a servidor: ${leastConnectedServer.instance.url}`);
 
-      const response = await axios.post(leastConnectedServer.instance.url, req.body);
+
+
+  for (let i = 0; i < connections.length; i++) {
+    try {
+
+      console.log(`Llamando a servidor: ${leastConnectedServer.instance}/tokens`);
+      const response = await axios.post(`http://${leastConnectedServer.instance}/tokens`, req.body);
       leastConnectedServer.requests++;
-      success = true; 
+      leastConnectedServer.logs.push(`${new Date()} - ${req.url} -  ${req.method}. ${response.body}`)
+
       return res.json(response.data);
 
     } catch (error) {
-      console.log(`Error. ${leastConnectedServer.instance.url}: ${error.message}. ${new Date()}`);
-      errorMessages.push(`Error. ${leastConnectedServer.instance.url}: ${error.message}. ${new Date()}`);
-      serverTried++;
 
-      connections = connections.filter(conn => conn.instance.url !== leastConnectedServer.instance.url);
+      console.log(`Error. ${leastConnectedServer.instance}: ${error.message}. ${new Date()}`);
+      leastConnectedServer.requests++;
+      if (error.response) {
+        leastConnectedServer.logs.push(`${new Date()} - ${error.response.status}`);
+      } else {
+        leastConnectedServer.logs.push(`${new Date()} - Error: ${error.message}`);
+      }
+      leastConnectedServer.tried = true;
 
-      if (connections.length > 0) {
-        leastConnectedServer = connections.reduce((prev, curr) => 
+      const availableConnections = connections.filter(conn => !conn.tried);
+      
+      if (availableConnections.length > 0) {
+        leastConnectedServer = availableConnections.reduce((prev, curr) => 
           prev.requests < curr.requests ? prev : curr
         );
+        console.log(leastConnectedServer)
       } else {
-        break; 
+        connections.forEach(conn => conn.tried = false);
+        return res.status(503).json({ error: "No hay servidores disponibles" });
+
       }
     }
   }
 
-  if (!success) {
-    return res.status(500).json({
-      error: "Todos los servidores fallaron",
-      errorMessages: errorMessages,
-      serversTried: serverTried
-    });
-  }
+  connections.forEach(conn => conn.tried = false);
+
+});
+
+
+app.get("/status", (req,res) =>{
+  res.json(connections);
 });
 
 
