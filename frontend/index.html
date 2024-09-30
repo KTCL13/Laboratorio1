@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Counter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Contador de Tokens</h1>
+        <form id="tokenForm">
+            <label for="text">Escribe tu texto:</label>
+            <textarea id="text" name="text" rows="4" cols="50"></textarea><br><br>
+            <button type="submit">Contar tokens</button>
+        </form>
+        <p>Cuenta de Tokens <span id="tokenCount">0</span></p>
+    </div>
+
+    <script>
+        document.getElementById('tokenForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent form submission
+
+            const text = document.getElementById('text').value;
+
+            const response = await fetch('http://192.168.1.17:5000/request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                document.getElementById('tokenCount').textContent = data.tokenCount;
+            } else {
+                document.getElementById('tokenCount').textContent = 'Error counting tokens';
+            }
+        });
+    </script>
+</body>
+</html>

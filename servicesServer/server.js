@@ -14,8 +14,6 @@ app.get("/tokens", (req, res) => {
     res.status(200).end();
 });
 
-app.use(express.static('frontend'));
-
 app.post("/tokens", (req, res) => {
     const text = req.body.text;
 

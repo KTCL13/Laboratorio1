@@ -10,7 +10,7 @@ const instances = [];
 
 app.post("/discoveryServer", async (req, res) => {
     console.log("Datos recibidos:", req.body);
-    const instance = req.body[0];
+    const instance = req.body;
     
     if(!instances.some(instancesOb => instancesOb.ipAddress === instance.ipAddress && instancesOb.port === instance.port)){
         try {
