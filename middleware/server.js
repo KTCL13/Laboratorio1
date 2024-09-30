@@ -35,7 +35,7 @@ app.post("/request", async (req, res) => {
       console.log(`Llamando a servidor: ${leastConnectedServer.instance}/tokens`);
       const response = await axios.post(`http://${leastConnectedServer.instance}/tokens`, req.body);
       leastConnectedServer.requests++;
-      leastConnectedServer.logs.push(`${new Date()} - ${req.url} -  ${req.method}. ${response.body}`)
+      leastConnectedServer.logs.push(`${new Date()} - ${req.originalUrl} -  ${req.method}. ${JSON.stringify(response.data)}`)
 
       return res.json(response.data);
 
@@ -44,7 +44,7 @@ app.post("/request", async (req, res) => {
       console.log(`Error. ${leastConnectedServer.instance}: ${error.message}. ${new Date()}`);
       leastConnectedServer.requests++;
       if (error.response) {
-        leastConnectedServer.logs.push(`${new Date()} - ${error.response.status}`);
+        leastConnectedServer.logs.push(`${new Date()} - ${error.response.status} - ${error.message}`);
       } else {
         leastConnectedServer.logs.push(`${new Date()} - Error: ${error.message}`);
       }
